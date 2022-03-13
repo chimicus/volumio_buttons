@@ -35,44 +35,43 @@ class Volumio:
         print(f'reconnected to {self.host}:{self.port}')
 
     def statusInfo(self, *args):
-        print(args)
-        self.status = args
+        self.status = args[0]
 
     def volume_up(self, pin_unused):
         print("volume_up")
-#        self._socketIO.emit('volume', '+')
+        self._socketIO.emit('volume', '+')
 
     def volume_down(self, pin_unused):
         print("volume_down")
-#        self._socketIO.emit('volume', '-')
+        self._socketIO.emit('volume', '-')
 
     def mute_unmute(self, pin_unused):
         print("mute_unmute")
-#        self.getStatus(timeout=0.1)
-#        while self.status == None:
-#            self.wait_for_server(timeout=0.1)
-#        cmd = 'mute'
-#        if self.status['mute'] == True:
-#            cmd = 'unmute'
-#        self._socketIO.emit(cmd)
+        self.getStatus(timeout=0.1)
+        while self.status == None:
+            self.wait_for_server(timeout=0.1)
+        cmd = 'mute'
+        if self.status['mute'] == True:
+            cmd = 'unmute'
+        self._socketIO.emit(cmd)
 
     def pause_play(self, pin_unused):
         print("pause_play")
-#        self.getStatus(timeout=0.1)
-#        while self.status == None:
-#            self.wait_for_server(timeout=0.1)
-#        cmd = 'play'
-#        if self.status['status'] == 'play':
-#            cmd = 'pause'
-#        self._socketIO.emit(cmd)
+        self.getStatus(timeout=0.1)
+        while self.status == None:
+            self.wait_for_server(timeout=0.1)
+        cmd = 'play'
+        if self.status['status'] == 'play':
+            cmd = 'pause'
+        self._socketIO.emit(cmd)
 
     def go_prev(self, pin_unused):
         print("go_prev")
-#        self._socketIO.emit('prev')
+        self._socketIO.emit('prev')
 
     def go_next(self, pin_unused):
         print("go_next")
-#        self._socketIO.emit('next')
+        self._socketIO.emit('next')
 
     def getStatus(self, timeout=None):
         self.status = None
@@ -80,30 +79,30 @@ class Volumio:
         self.wait_for_server(timeout=timeout)
 
 def config_gpio(volumio):
-    default_bouncetime=300
+    default_bouncetime=1000
     GPIO.setmode(GPIO.BCM)
     # volume up
-    GPIO.setup(BUTTON_VOLUME_UP, GPIO.IN)
+    GPIO.setup(BUTTON_VOLUME_UP, GPIO.IN, pull_up_down=GPIO.PUD_UP)
     GPIO.add_event_detect(BUTTON_VOLUME_UP, GPIO.RISING, bouncetime=default_bouncetime)
     GPIO.add_event_callback(BUTTON_VOLUME_UP, volumio.volume_up)
     # volume down
-    GPIO.setup(BUTTON_VOLUME_DOWN, GPIO.IN)
+    GPIO.setup(BUTTON_VOLUME_DOWN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
     GPIO.add_event_detect(BUTTON_VOLUME_DOWN, GPIO.RISING, bouncetime=default_bouncetime)
     GPIO.add_event_callback(BUTTON_VOLUME_DOWN, volumio.volume_down)
     # mute_unmute
-    GPIO.setup(BUTTON_MUTE_UNMUTE, GPIO.IN)
+    GPIO.setup(BUTTON_MUTE_UNMUTE, GPIO.IN, pull_up_down=GPIO.PUD_UP)
     GPIO.add_event_detect(BUTTON_MUTE_UNMUTE, GPIO.RISING, bouncetime=default_bouncetime)
     GPIO.add_event_callback(BUTTON_MUTE_UNMUTE, volumio.mute_unmute)
     # pause_play
-    GPIO.setup(BUTTON_PAUSE_PLAY, GPIO.IN)
+    GPIO.setup(BUTTON_PAUSE_PLAY, GPIO.IN, pull_up_down=GPIO.PUD_UP)
     GPIO.add_event_detect(BUTTON_PAUSE_PLAY, GPIO.RISING, bouncetime=default_bouncetime)
     GPIO.add_event_callback(BUTTON_PAUSE_PLAY, volumio.pause_play)
     # go_prev
-    GPIO.setup(BUTTON_GO_PREV, GPIO.IN)
+    GPIO.setup(BUTTON_GO_PREV, GPIO.IN, pull_up_down=GPIO.PUD_UP)
     GPIO.add_event_detect(BUTTON_GO_PREV, GPIO.RISING, bouncetime=default_bouncetime)
     GPIO.add_event_callback(BUTTON_GO_PREV, volumio.go_prev)
     # go_next
-    GPIO.setup(BUTTON_GO_NEXT, GPIO.IN)
+    GPIO.setup(BUTTON_GO_NEXT, GPIO.IN, pull_up_down=GPIO.PUD_UP)
     GPIO.add_event_detect(BUTTON_GO_NEXT, GPIO.RISING, bouncetime=default_bouncetime)
     GPIO.add_event_callback(BUTTON_GO_NEXT, volumio.go_next)
 
@@ -113,6 +112,5 @@ if __name__ == '__main__':
     config_gpio(v)
     v.getStatus()
     while(1):
-        # TODO: instead of polling switch to callbacks for all buttons
         v.wait_for_server(timeout=0.1)
 
